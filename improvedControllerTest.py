@@ -1,4 +1,4 @@
-import triad_openvr
+from triad_openvr import triad_openvr
 import time
 import sys
 
