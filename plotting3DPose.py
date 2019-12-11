@@ -59,7 +59,7 @@ class Plotting3DPose(object):
         start the plotting
         """
         def _animate(i):
-            self.update()
+            self.update()#shuold update the pose vector with format (transformation x y z, rotation i j k w)
             self.ax.cla()#clear previous graphs
             #set boundary to not allow for 
             self.ax.set_xlim3d(-self.boundary[0],self.boundary[0])
@@ -67,39 +67,20 @@ class Plotting3DPose(object):
             self.ax.set_zlim3d(-self.boundary[2],self.boundary[2])
             for pose in self.poseList:
                 #plot the origin of coordinate system
-                # x1,y1,z1=[random.randrange(0,5),random.randrange(0,5),random.randrange(0,5)]
                 x1,y1,z1=pose[0]
-                self.ax.plot([x1],[y1],[z1],'ro',alpha=0.8, lw=3)
-                #self.ax.plot(random.randrange(0,5),pose[0][1],pose[0][2],'ro',alpha=0.8, lw=3)
-                #print([pose[0][0]],pose[0][1],pose[0][2])
-                #plot the axis of the system 
-                # uI=input("enter i j k w\n").split(" ")
-                # listed=[float(x) for x in uI if x.isdigit()]
-                # r=R.from_quat(listed)
-
+                self.ax.plot([x1],[y1],[z1],'go',alpha=0.8, lw=3)
                 r=R.from_quat(pose[1])
-                print(r.as_dcm())
-                
-                print("x1: ",[x1,y1,z1])
-                xNew=r.apply(self.baseXVec)#+[x1,y1,z1]
-                print(xNew)
-                yNew=r.apply(self.baseYVec)+y1
-                zNew=r.apply(self.baseZVec)+z1        
+                xNew=r.apply(self.baseXVec)
+                yNew=r.apply(self.baseYVec)
+                zNew=r.apply(self.baseZVec)        
                 #plot The axis x= blue y= yellow z=red
                 #if the axis need to be scaled, scale the base vectors at the top of this class implementation
                 xAxis = Arrow3D([x1,xNew[0]+x1], [y1,xNew[1]+y1], [z1,xNew[2]+z1], mutation_scale=20, lw=3, arrowstyle="-|>", color="b")
-                #uI=input("enter x y\n").split(" ")
-                #listed=[float(x) for x in uI]
-                #xAxis = Arrow3D(listed[1:3], listed[3:5], listed[5:7], mutation_scale=20, lw=3, arrowstyle="-|>", color="b")
-
-                # print(pose[0][0], pose[0][1], pose[0][2])
-
-                #xAxis = Arrow3D([[pose[0][0]], xNew[0]], [[pose[0][1]], xNew[1]], [[pose[0][2]],xNew[2]], mutation_scale=20, lw=3, arrowstyle="-|>", color="b")
-                # yAxis = Arrow3D([[pose[0][0]], yNew[0]], [[pose[0][1]], yNew[1]], [[pose[0][2]],yNew[2]], mutation_scale=20, lw=3, arrowstyle="-|>", color="y")
-                # zAxis = Arrow3D([[pose[0][0]], zNew[0]], [[pose[0][1]], zNew[1]], [[pose[0][2]],zNew[2]], mutation_scale=20, lw=3, arrowstyle="-|>", color="r")
+                yAxis = Arrow3D([x1,yNew[0]+x1], [y1,yNew[1]+y1], [z1,yNew[2]+z1], mutation_scale=20, lw=3, arrowstyle="-|>", color="y")
+                zAxis = Arrow3D([x1,zNew[0]+x1], [y1,zNew[1]+y1], [z1,zNew[2]+z1], mutation_scale=20, lw=3, arrowstyle="-|>", color="r")
                 self.ax.add_artist(xAxis)
-                # self.ax.add_artist(yAxis)
-                # self.ax.add_artist(zAxis)
+                self.ax.add_artist(yAxis)
+                self.ax.add_artist(zAxis)
             return self.ax
         ani = FuncAnimation(self.fig, _animate,  self.interval)
         plt.show()
@@ -123,8 +104,11 @@ class Plotting3DPose(object):
     def updateVive(self):
         try:
             [x,y,z,w, i, j, k]=self.v.devices["controller_1"].get_pose_quaternion()
+            self.poseList[0]=[x,y,z,i, j, k, w]
         except TypeError :
-            pass
+            #this occurs when connection to device is lost
+            #thus stay at same position and dont change orientation
+            self.poseList[0]=self.poseList[1:4]+[0,0,0,1]
     def initVive(self):
         v = triad_openvr.triad_openvr()
         self.v.print_discovered_objects()
