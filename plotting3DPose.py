@@ -30,10 +30,10 @@ class Plotting3DPose(object):
     """
     Creates 3D Plot object which can be used to plot 3D Pose data dynamicially (at given update rate)
     """
-    baseXVec=[5,0,0]
-    baseYVec=[0,5,0]
-    baseZVec=[0,0,5]
-    def __init__(self,interval=1000,numPoses=1,boundary=[10,10,10]):
+    baseXVec=[0.7,0,0]
+    baseYVec=[0,0.7,0]
+    baseZVec=[0,0,0.7]
+    def __init__(self,interval=1000,numPoses=1,boundary=[1,1,1]):
         """
         interval: min time between updates tothe graph
         numPoses: number of poses that will be plotted(for now only one)
@@ -59,7 +59,7 @@ class Plotting3DPose(object):
         start the plotting
         """
         def _animate(i):
-            self.update()#shuold update the pose vector with format (transformation x y z, rotation i j k w)
+            self.updateVive()#shuold update the pose vector with format (transformation x y z, rotation i j k w)
             self.ax.cla()#clear previous graphs
             #set boundary to not allow for 
             self.ax.set_xlim3d(-self.boundary[0],self.boundary[0])
@@ -103,17 +103,18 @@ class Plotting3DPose(object):
         self.poseList[objNumber]=newPose
     def updateVive(self):
         try:
-            [x,y,z,w, i, j, k]=self.v.devices["controller_1"].get_pose_quaternion()
-            self.poseList[0]=[x,y,z,i, j, k, w]
+            [x,y,z, i, j, k,w]=self.v.devices["controller_1"].get_pose_quaternion()
+            self.poseList[0]=[[x,y,z],[w, j, k, i]]
         except TypeError :
             #this occurs when connection to device is lost
             #thus stay at same position and dont change orientation
             self.poseList[0]=self.poseList[1:4]+[0,0,0,1]
     def initVive(self):
-        v = triad_openvr.triad_openvr()
+        self.v = triad_openvr.triad_openvr()
         self.v.print_discovered_objects()
         
 np.random.seed(0)
 test=Plotting3DPose(1000,1)
+test.initVive()
 test.start()
 
