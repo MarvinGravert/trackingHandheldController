@@ -3,14 +3,13 @@ import struct
 import random
 
 
+#
 TCP_IP = '192.168.178.44'#home laptop
 #TCP_IP = '192.168.43.152'#hotspot
 TCP_PORT = 5005
 BUFFER_SIZE = 100  
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((TCP_IP, TCP_PORT))
-s.listen(1)
+
 def getData():
     
     data=input("x y z i j k w\n").split(" ")
@@ -32,7 +31,9 @@ def getData():
     dataToSend=struct.pack("%ds" % (len(s),), s)
     c=bytearray(dataToSend)
     return c
-    
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((TCP_IP, TCP_PORT))
+s.listen(1)    
 conn, addr = s.accept()
 print('Connection address:', addr)
 while True:
