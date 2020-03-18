@@ -104,7 +104,7 @@ class Plotting3DPose(object):
     def updateVive(self):
         try:
             [x,y,z, i, j, k,w]=self.v.devices["controller_1"].get_pose_quaternion()
-            self.poseList[0]=[[x,y,z],[w, j, k, i]]
+            self.poseList[0]=[[x,y,z],[-i, -j, -k, w]]
         except TypeError :
             #this occurs when connection to device is lost
             #thus stay at same position and dont change orientation
